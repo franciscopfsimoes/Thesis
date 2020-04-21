@@ -399,7 +399,7 @@ def MeanResidualsBS(vol, alpha):
     #############################MAIN FUNCTIONS###############################
 
 
-def ExamplePath(numSteps, T, f0, D, alpha, beta, rho, Vv):
+def ExamplePath(numSteps, T, f0, D, alpha, beta, rho, Vv): #produces and displays an example SABR path
 
     path = SABRpathSim(numSteps, T, f0, alpha, beta, rho, Vv); pathPlot(numSteps, path)
 
@@ -418,7 +418,7 @@ def DynamicSimulation(T, f0, alpha, beta, rho, Vv, numquotes, time, numSimulatio
     ARV = getParameters(beta, quote, vol);
     plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
-def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations):
+def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #produces simutaneous quotes evenly spaced and evaluates the SABR fitting
 
     quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
@@ -469,7 +469,6 @@ def figure3():
 
 
 numSimulations = 10000 #number of simulations per quote in montecarlo
-
 numSteps = 1000 #number of time steps per simulations
 
 T = 1/4 #time to maturity
