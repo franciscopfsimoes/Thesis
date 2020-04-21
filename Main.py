@@ -12,20 +12,21 @@ import Black
 import SABR
 import Estimating
 
-def foward(S, mu, T):
 
-    f = float(S) * math.exp(mu * T)
+def foward(S, D, T): #computes foward from spot price
+
+    f = S * (1 - D * T)
 
     return f
 
 
-def spot(f, mu, T):
+def spot(f, D, T): #computes spot from foward price
 
-    S = float(f) * math.exp(-mu * T)
+    S =  f * (1 - D * T)
 
     return S
 
-def corrNum(rho):
+def corrNum(rho): #returns two correlated random normally distrubuted numbers
 
     z1 = random.gauss(0, 1)
 
@@ -34,7 +35,7 @@ def corrNum(rho):
     return (z1, z2)
 
 
-def SABRpathSim(numSteps, T, f0, alpha, beta, rho, Vv):
+def SABRpathSim(numSteps, T, f0, alpha, beta, rho, Vv): #returns a f and v paths of a SABR simulation
 
     dt = float(T) / float(numSteps)
 
@@ -71,7 +72,7 @@ def SABRpathSim(numSteps, T, f0, alpha, beta, rho, Vv):
 
     return (f, vol) #returns paths as lists
 
-def SABRfowardSim(numSteps, T, f0, alpha, beta, rho, Vv):
+def SABRfowardSim(numSteps, T, f0, alpha, beta, rho, Vv): # returns f(T) after a SABR simulation
 
     dt = float(T) / float(numSteps)
 
@@ -95,7 +96,7 @@ def SABRfowardSim(numSteps, T, f0, alpha, beta, rho, Vv):
 
     return ft
 
-def pathPlot(numSteps, path):
+def pathPlot(numSteps, path): #plots v and f path
 
     t = 0
 
@@ -113,7 +114,7 @@ def pathPlot(numSteps, path):
 
     plt.show()
 
-def randStrike(f0):
+def randStrike(f0): #generates a random strike normally distributed around f0
 
     dK = float(np.random.normal(0, 0.30, 1)) * f0
 
@@ -121,7 +122,7 @@ def randStrike(f0):
 
     return K
 
-def intervalStrike(f0, numquotes):
+def intervalStrike(f0, numquotes): #generates N = numquotes strikes in [0.5 x f0; 1.5 x f0]
 
     dK = float(f0 / (numquotes - 1) )
 
@@ -139,20 +140,11 @@ def intervalStrike(f0, numquotes):
 
 
 
-def randputOrCall():
+def randputOrCall(): #returns 1(call) or 0(put) with equal probability
 
-    if random.random() < 0.5:  # call
+    return map(int, (random.random() < 0.5))
 
-        iscall = 1
-
-
-    else:
-
-        iscall = 0
-
-    return iscall
-
-def dynamicQuotes(T, f0, alpha, beta, rho, Vv, numquotes, time):
+def dynamicQuotes(T, f0, alpha, beta, rho, Vv, numquotes, time): #generates quotes equally spaced during time
 
     numSteps = 200
 
@@ -184,7 +176,7 @@ def dynamicQuotes(T, f0, alpha, beta, rho, Vv, numquotes, time):
 
 
 
-def instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes):
+def instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes): #generates simultaneous quotes
 
     f = []
 
@@ -210,7 +202,7 @@ def instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes):
 
     return f, vol, duration, strike, type
 
-def valueAtMaturity(f, K, type):
+def valueAtMaturity(f, K, type): #evaluates a the value of a option ate maturity
 
     if type == 0:
 
@@ -222,21 +214,7 @@ def valueAtMaturity(f, K, type):
 
     return  payoff
 
-
-def confidenceInterval(list, confidence):
-
-    n = len(list)
-    m = np.mean(list)
-    std_err = scipy.stats.sem(list)
-    h = std_err * scipy.stats.t.ppf((1 + confidence) / 2, n - 1)
-
-    start = m - h
-
-    end = m + h
-
-    return start, end
-
-def expectedValuation(f0, D, alpha, duration, strike, type, beta, rho, Vv, numSimulations):
+def expectedValuation(f0, D, alpha, duration, strike, type, beta, rho, Vv, numSimulations): #returns the expected value of a option
 
     i = 0
 
@@ -261,8 +239,7 @@ def expectedValuation(f0, D, alpha, duration, strike, type, beta, rho, Vv, numSi
     return price
 
 
-
-def getPrice(quote, beta, rho, Vv, numSimulations):
+def getPrice(quote, beta, rho, Vv, numSimulations): #returns prices of a list of quotes
 
     f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
@@ -280,7 +257,7 @@ def getPrice(quote, beta, rho, Vv, numSimulations):
 
     return price
 
-def getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations):
+def getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations): #returns prices of a list of test (simutaneous) quotes
 
     f0, vol, duration, strike, type = quote[0][0], quote[1][0], quote[2][0], quote[3], quote[4]
 
@@ -304,16 +281,7 @@ def getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations):
 
     return price
 
-def volInterval(price, quote):
-
-    lb = price[1]; ub = price[2]
-
-    low = getVolatility(lb, quote);high = getVolatility(ub, quote)
-
-    return low, high
-
-
-def getVolatility(price, D, quote):
+def getVolatility(price, D, quote): #returns implied volatilities of a list of priced quotes
 
     V = []
 
@@ -332,7 +300,7 @@ def getVolatility(price, D, quote):
     return V
 
 
-def getParameters(beta, quote, vol):
+def getParameters(beta, quote, vol): #returns estimation of parameters of the SABR volatility smile based on the quotes
 
     f0, duration, strike = quote[0], quote[2], quote[3]
 
@@ -341,7 +309,7 @@ def getParameters(beta, quote, vol):
     return optarv
 
 
-def NormalizeStrike(quote):
+def NormalizeStrike(quote): #returns strike normalized as to f0
 
     strike = quote[3]
     f0 = quote[0]
@@ -354,7 +322,7 @@ def NormalizeStrike(quote):
     return Kf0
 
 
-def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T):
+def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical SABR curve
 
     sabrvol = []
     K = []
@@ -368,7 +336,7 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T):
 
     plt.plot(K, sabrvol, "--", label='theoretical SABR')
 
-def plotQuotes(quote, vol):
+def plotQuotes(quote, vol): #plots a list of quotes
 
     strike, type = quote[3], quote[4]
 
@@ -383,7 +351,7 @@ def plotQuotes(quote, vol):
             plt.plot(Kf0[i], vol[i], ms = 4, c = 'b', marker = '^')
 
 
-def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T):
+def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
 
     sabrvol = []
 
