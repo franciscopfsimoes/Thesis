@@ -470,7 +470,7 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations):
     #ARV = getParameters(beta, quote, vol);
     #plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
-
+##### PLOT EXAMPLES ####
 def figure1():
     exampleSABRVolSmile(0.036698, 0.5, 0.098252, 0.599714, 0.07, 0)
     exampleSABRVolSmile(0.037561, 0.5, 0.100044, 0.573296, 0.07, 0)
@@ -497,19 +497,22 @@ def figure3():
 
 
 
-##############################MAIN######################################################
+##############################MAIN BODY######################################################
 
 
+numSimulations = 10000 #number of simulations per quote in montecarlo
 
-numSteps = 1000
+numSteps = 1000 #number of time steps per simulations
 
-T, f0, alpha, beta, rho, Vv = 1/4, 1000, 0.5, 1, -0.4, 0.5
-
+T = 1/4 #time to maturity
+f0 = 1000 #foward at time t = 0
+alpha = 0.5 #alpha
+beta = 1 #beta
+rho = -0.4 #rho
+Vv = 0.5 #volatility of volatility
 D = 1 #discount rate
 
-numquotes, time = 20, 1/365 ;
-
-numSimulations = 10000;
+numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simulate over which period of time
 
 #ExamplePath(numSteps, T, f0, D, alpha, beta, rho, Vv)
 
