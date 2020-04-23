@@ -1,0 +1,1 @@
+def LMA (quotes)
