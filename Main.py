@@ -471,10 +471,10 @@ def figure3():
 numSimulations = 10000 #number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
-T = 1 #time to maturity
+T = 1/4 #time to maturity
 f0 = 1000 #foward at time t = 0
-alpha = 0.07 #alpha
-beta = 0.5 #beta
+alpha = 0.5 #alpha
+beta = 0 #beta
 rho = -0.5 #rho
 Vv = 1.5 #volatility of volatility
 D = 1 #discount rate
