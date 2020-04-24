@@ -428,7 +428,7 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
     vol = getVolatility(premium, D, quote);
 
     plotQuotes(quote, vol);
-    plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+    #plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
     if Vv == 0:
         print(MeanResidualsBS(vol,alpha))
@@ -468,15 +468,15 @@ def figure3():
 ##############################MAIN BODY######################################################
 
 
-numSimulations = 10000 #number of simulations per quote in montecarlo
+numSimulations = 100000 #number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
-T = 1/4 #time to maturity
-f0 = 1000 #foward at time t = 0
-alpha = 0.5 #alpha
-beta = 0.3 #beta
-rho = -0.4 #rho
-Vv = 1.5 #volatility of volatility
+T = 1 #time to maturity
+f0 = 0.8 #foward at time t = 0
+alpha = 0.0425 #alpha
+beta = 0.4 #beta
+rho = -0.33 #rho
+Vv = 0.25 #volatility of volatility
 D = 1 #discount rate
 
 numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simulate over which period of time
@@ -488,7 +488,7 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
 axes = plt.gca()
-axes.set_ylim([0, 1])
+#axes.set_ylim([0, 1])
 plt.legend(loc='best')
 plt.show()
 
