@@ -90,7 +90,7 @@ def SABRfowardSim(numSteps, T, f0, alpha, beta, rho, Vv): # returns f(T) after a
 
         ft = ft + alphat * (ft ** beta) * float(z[0]) * sqrtdt
 
-        alphat = alphat + alphat * Vv * float(z[1]) * sqrtdt
+        alphat = max(0, alphat + alphat * Vv * float(z[1]) * sqrtdt)
 
         step += 1
 
@@ -471,12 +471,12 @@ def figure3():
 numSimulations = 10000 #number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
-T = 1/4 #time to maturity
+T = 1 #time to maturity
 f0 = 1000 #foward at time t = 0
-alpha = 0.5 #alpha
-beta = 1 #beta
-rho = -0.4 #rho
-Vv = 0.5 #volatility of volatility
+alpha = 0.07 #alpha
+beta = 0.5 #beta
+rho = -0.5 #rho
+Vv = 1.5 #volatility of volatility
 D = 1 #discount rate
 
 numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simulate over which period of time
@@ -488,7 +488,7 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
 axes = plt.gca()
-axes.set_ylim([0, 1])
+#axes.set_ylim([0, 1])
 plt.legend(loc='best')
 plt.show()
 
