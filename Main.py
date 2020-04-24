@@ -124,7 +124,7 @@ def randStrike(f0): #generates a random strike normally distributed around f0
 
 def intervalStrike(f0, numquotes): #generates N = numquotes strikes in [0.5 x f0; 1.5 x f0]
 
-    dK = float(f0 / (numquotes - 1) )
+    dK = float(0.7 * f0 / (numquotes - 1) )
 
     K = []
 
@@ -132,7 +132,7 @@ def intervalStrike(f0, numquotes): #generates N = numquotes strikes in [0.5 x f0
 
     while i < numquotes:
 
-        K.append(0.5 * f0 + i*dK)
+        K.append(0.7 * f0 + i*dK)
 
         i += 1
 
@@ -327,7 +327,7 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical
     sabrvol = []
     K = []
 
-    lb = round(0.3*f0); ub = round(2*f0)
+    lb = round(0.7*f0); ub = round(1.3*f0)
 
     for k in np.arange(lb, ub, 1):
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
@@ -357,8 +357,8 @@ def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
 
     K = []
 
-    lb = round(0.5 * f0);
-    ub = round(2 * f0)
+    lb = round(0.7 * f0);
+    ub = round(1.3 * f0)
 
     for k in np.arange(lb, ub, 1):
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
@@ -474,8 +474,8 @@ numSteps = 1000 #number of time steps per simulations
 T = 1/4 #time to maturity
 f0 = 1000 #foward at time t = 0
 alpha = 0.5 #alpha
-beta = 0 #beta
-rho = -0.5 #rho
+beta = 0.3 #beta
+rho = -0.4 #rho
 Vv = 1.5 #volatility of volatility
 D = 1 #discount rate
 
@@ -488,7 +488,7 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
 axes = plt.gca()
-#axes.set_ylim([0, 1])
+axes.set_ylim([0, 1])
 plt.legend(loc='best')
 plt.show()
 
