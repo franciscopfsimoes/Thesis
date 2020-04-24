@@ -60,37 +60,38 @@ def impVol(alpha, beta, rho, Vv, K, f, T): #Returns SABR implied volatility (F.D
     return vol
 '''
 
-def Z(alpha, beta, Vv, k):
+def I0(alpha, beta, rho, Vv, K, f0):
 
-    num = (1 - math.pow(k, (1 - beta))) * Vv
+    x = math.log(f0/K)
 
-    den = alpha * (1 - beta)
+    if beta == 1:
+
+        z = Vv*x / alpha
+
+    elif beta < 1:
+
+        z = Vv*(math.pow(f0, 1- beta) - math.pow(f0, 1- beta))/(alpha * (1 - beta))
+
+    num = Vv * x
+
+    den = math.log((math.sqrt(1.0 - (2.0 * rho * z) + math.pow(z, 2.0)) + z - rho) / (1.0 - rho))
+
 
     return num / den
 
-def I0(alpha, beta, rho, Vv, k):
 
-    z = Z(alpha, beta, Vv, k)
+def I1(alpha, beta, rho, Vv, K, f0):
 
-    num = -Vv * math.log(k)
+    k = K / f0
 
-    den = math.log((math.sqrt(1 - (2 * rho * z) + math.pow(z, 2)) + z - rho) / (1 - rho))
+    a1 = 1 / 24.0 * math.pow(k, (-1.0 + beta)) * math.pow(alpha, 2.0) * math.pow((-1.0 + beta), 2.0)
 
-    return num / den
+    a2 = 1 / 4.0 * math.pow(k, (1.0 / 2.0 * (-1.0 + beta))) * alpha * beta * Vv * rho
 
-
-def I1(alpha, beta, rho, Vv, k):
-
-    a1 = 1 / 24 * math.pow(k, (-1 + beta)) * math.pow(alpha, 2) * math.pow((-1 + beta), 2)
-
-    a2 = 1 / 4 * math.pow(k, (1 / 2 * (-1 + beta))) * alpha * beta * Vv * rho
-
-    a3 = 1 / 24 * math.pow(Vv, 2) * (2 - 3 * (rho ** 2))
+    a3 = 1 / 24.0 * math.pow(Vv, 2.0) * (2.0 - 3.0 * math.pow(rho, 2.0))
 
     return a1 + a2 + a3
 
 def impVol(alpha, beta, rho, Vv, K, f0, T):
 
-    k = K/f0
-
-    return I0(alpha, beta, rho, Vv, k) * (1 + I1(alpha, beta, rho, Vv, k) * T)
+    return I0(alpha, beta, rho, Vv, K, f0) * (1 + I1(alpha, beta, rho, Vv, K, f0) * T)
