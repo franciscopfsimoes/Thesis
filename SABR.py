@@ -1,5 +1,5 @@
 import math
-
+'''
 #Auxiliary functions
 def A1(alpha, beta, f, K):
 
@@ -58,3 +58,39 @@ def impVol(alpha, beta, rho, Vv, K, f, T): #Returns SABR implied volatility (F.D
 
 
     return vol
+'''
+
+def Z(alpha, beta, Vv, k):
+
+    num = (1 - math.pow(k, (1 - beta))) * Vv
+
+    den = alpha * (1 - beta)
+
+    return num / den
+
+def I0(alpha, beta, rho, Vv, k):
+
+    z = Z(alpha, beta, Vv, k)
+
+    num = -Vv * math.log(k)
+
+    den = math.log((math.sqrt(1 - (2 * rho * z) + math.pow(z, 2)) + z - rho) / (1 - rho))
+
+    return num / den
+
+
+def I1(alpha, beta, rho, Vv, k):
+
+    a1 = 1 / 24 * math.pow(k, (-1 + beta)) * math.pow(alpha, 2) * math.pow((-1 + beta), 2)
+
+    a2 = 1 / 4 * math.pow(k, (1 / 2 * (-1 + beta))) * alpha * beta * Vv * rho
+
+    a3 = 1 / 24 * math.pow(Vv, 2) * (2 - 3 * (rho ** 2))
+
+    return a1 + a2 + a3
+
+def impVol(alpha, beta, rho, Vv, K, f0, T):
+
+    k = K/f0
+
+    return I0(alpha, beta, rho, Vv, k) * (1 + I1(alpha, beta, rho, Vv, k) * T)
