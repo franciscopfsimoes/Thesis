@@ -88,7 +88,7 @@ def SABRfowardSim(numSteps, T, f0, alpha, beta, rho, Vv): # returns f(T) after a
 
         z = corrNum(rho)
 
-        ft = ft + alphat * (ft ** beta) * float(z[0]) * sqrtdt
+        ft = max(0, ft + alphat * (ft ** beta) * float(z[0]) * sqrtdt)
 
         alphat = max(0, alphat + alphat * Vv * float(z[1]) * sqrtdt)
 
@@ -124,7 +124,7 @@ def randStrike(f0): #generates a random strike normally distributed around f0
 
 def intervalStrike(f0, numquotes): #generates N = numquotes strikes in [0.5 x f0; 1.5 x f0]
 
-    dK = float(0.7 * f0 / (numquotes - 1) )
+    dK = float(f0 / (numquotes - 1) )
 
     K = []
 
@@ -132,7 +132,7 @@ def intervalStrike(f0, numquotes): #generates N = numquotes strikes in [0.5 x f0
 
     while i < numquotes:
 
-        K.append(0.7 * f0 + i*dK)
+        K.append(0.5 * f0 + i*dK)
 
         i += 1
 
@@ -327,9 +327,9 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical
     sabrvol = []
     K = []
 
-    lb = 0.7*f0; ub = 1.4*f0
+    lb = 0.5*f0; ub = 1.5*f0
 
-    for k in np.linspace(lb, ub, num = 50):
+    for k in np.linspace(lb, ub, num = 101):
 
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
         sabrvol.append(vi)
@@ -362,7 +362,7 @@ def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
     lb = 0.7 * f0;
     ub = 1.4 * f0
 
-    for k in np.linspace(lb, ub, num=50):
+    for k in np.linspace(lb, ub, num=101):
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
         sabrvol.append(vi)
         K.append(float(k / f0))
@@ -476,7 +476,7 @@ numSteps = 1000 #number of time steps per simulations
 T = 15 #time to maturity
 f0 = 0.75 #foward at time t = 0
 alpha = 0.0425 #alpha
-beta = 0.4 #beta
+beta = 0 #beta
 rho = -0.33 #rho
 Vv = 0.25 #volatility of volatility
 D = 1 #discount rate
