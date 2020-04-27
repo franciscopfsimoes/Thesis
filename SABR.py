@@ -97,13 +97,11 @@ def I0(alpha, beta, rho, Vv, K, f0):
 
 def I1(alpha, beta, rho, Vv, K, f0):
 
-    k = K / f0
+    a1 = (1 / 24.0) * math.pow((beta - 1), 2) * math.pow(alpha, 2) / (math.pow((f0*K), (1-beta)))
 
-    a1 = 1 / 24.0 * math.pow(k, (-1.0 + beta)) * math.pow(alpha, 2.0) * math.pow((-1.0 + beta), 2.0)
+    a2 = (1 / 4.0) * alpha * beta * Vv * rho / (math.pow((f0*K), ((1-beta)/2)))
 
-    a2 = 1 / 4.0 * math.pow(k, (1.0 / 2.0 * (-1.0 + beta))) * alpha * beta * Vv * rho
-
-    a3 = 1 / 24.0 * math.pow(Vv, 2.0) * (2.0 - 3.0 * math.pow(rho, 2.0))
+    a3 = (1 / 24.0) * math.pow(Vv, 2.0) * (2.0 - 3.0 * math.pow(rho, 2.0))
 
     return a1 + a2 + a3
 
