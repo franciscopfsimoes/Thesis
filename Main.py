@@ -327,12 +327,15 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical
     sabrvol = []
     K = []
 
-    lb = round(0.7*f0); ub = round(1.3*f0)
+    lb = 0.7*f0; ub = 1.4*f0
 
-    for k in np.arange(lb, ub, 1):
+    for k in np.linspace(lb, ub, num = 50):
+
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
         sabrvol.append(vi)
         K.append(float(k/f0))
+
+    print(np.linspace(lb, ub, num = 20), sabrvol)
 
     plt.plot(K, sabrvol, "--", label='theoretical SABR')
 
@@ -354,16 +357,15 @@ def plotQuotes(quote, vol): #plots a list of quotes
 def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
 
     sabrvol = []
-
     K = []
 
-    lb = round(0.7 * f0);
-    ub = round(1.3 * f0)
+    lb = 0.7 * f0;
+    ub = 1.4 * f0
 
-    for k in np.arange(lb, ub, 1):
+    for k in np.linspace(lb, ub, num=50):
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
         sabrvol.append(vi)
-        K.append(float(k/f0))
+        K.append(float(k / f0))
 
     plt.plot(K, sabrvol, label='fitted SABR')
 
@@ -428,7 +430,7 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
     vol = getVolatility(premium, D, quote);
 
     plotQuotes(quote, vol);
-    #plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+    plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
     if Vv == 0:
         print(MeanResidualsBS(vol,alpha))
