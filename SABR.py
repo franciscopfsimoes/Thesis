@@ -1,5 +1,5 @@
 import math
-'''
+
 #Auxiliary functions
 def A1(alpha, beta, f, K):
 
@@ -70,9 +70,17 @@ def I0(alpha, beta, rho, Vv, K, f0):
 
     elif Vv == 0:
 
-        num = x * alpha * (1 - beta)
+        if beta == 1:
 
-        den = math.pow(f0, 1- beta) - math.pow(K, 1- beta)
+            num = alpha * x
+
+            den = x
+
+        elif beta < 1:
+
+            num = x * alpha * (1 - beta)
+
+            den = math.pow(f0, 1 - beta) - math.pow(K, 1- beta)
 
         i = num / den
 
@@ -108,3 +116,4 @@ def I1(alpha, beta, rho, Vv, K, f0):
 def impVol(alpha, beta, rho, Vv, K, f0, T):
 
     return I0(alpha, beta, rho, Vv, K, f0) * (1 + I1(alpha, beta, rho, Vv, K, f0) * T)
+'''
