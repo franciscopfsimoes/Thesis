@@ -57,13 +57,9 @@ def SABRpathSim(numSteps, T, f0, alpha, beta, rho, Vv): #returns a f and v paths
 
         z = corrNum(rho)
 
-        dWf = float(z[0]) * sqrtdt
+        ft = max(0, ft + alphat * (ft ** beta) * float(z[0]) * sqrtdt)
 
-        dWa = float(z[1]) * sqrtdt
-
-        ft = ft + alphat * (ft ** beta) * dWf
-
-        alphat = alphat + alphat * Vv * dWa
+        alphat = max(0, alphat + alphat * Vv * float(z[1]) * sqrtdt)
 
         f.append(ft)
         vol.append(alphat)
@@ -470,13 +466,13 @@ def figure3():
 ##############################MAIN BODY######################################################
 
 
-numSimulations = 100000 #number of simulations per quote in montecarlo
+numSimulations = 10000 #number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
 T = 15 #time to maturity
-f0 = 0.75 #foward at time t = 0
+f0 = 0.0801 #foward at time t = 0
 alpha = 0.0425 #alpha
-beta = 0 #beta
+beta = 1 #beta
 rho = -0.33 #rho
 Vv = 0.25 #volatility of volatility
 D = 1 #discount rate
@@ -490,7 +486,8 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
 axes = plt.gca()
-#axes.set_ylim([0, 1])
+#axes.set_ylim([0, 0.25])
+axes.set_xlim([0.4, 1.6])
 plt.legend(loc='best')
 plt.show()
 
