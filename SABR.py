@@ -64,13 +64,14 @@ def I0(alpha, beta, rho, Vv, K, f0):
 
     x = math.log(f0/K)
 
+
     if beta == 1:
 
         z = Vv*x / alpha
 
     elif beta < 1:
 
-        z = Vv*(math.pow(f0, 1- beta) - math.pow(f0, 1- beta))/(alpha * (1 - beta))
+        z = Vv*(math.pow(f0, 1- beta) - math.pow(K, 1- beta))/(alpha * (1 - beta))
 
     num = Vv * x
 
