@@ -64,21 +64,35 @@ def I0(alpha, beta, rho, Vv, K, f0):
 
     x = math.log(f0/K)
 
+    if x == 0:
 
-    if beta == 1:
+        i = alpha * math.pow(K,(beta-1))
 
-        z = Vv*x / alpha
+    elif Vv == 0:
 
-    elif beta < 1:
+        num = x * alpha * (1 - beta)
 
-        z = Vv*(math.pow(f0, 1- beta) - math.pow(K, 1- beta))/(alpha * (1 - beta))
+        den = math.pow(f0, 1- beta) - math.pow(K, 1- beta)
 
-    num = Vv * x
+        i = num / den
 
-    den = math.log((math.sqrt(1.0 - (2.0 * rho * z) + math.pow(z, 2.0)) + z - rho) / (1.0 - rho))
+    else:
 
+        if beta == 1:
 
-    return num / den
+            z = Vv*x / alpha
+
+        elif beta < 1:
+
+            z = Vv*(math.pow(f0, 1- beta) - math.pow(K, 1- beta))/(alpha * (1 - beta))
+
+        num = Vv * x
+
+        den = math.log((math.sqrt(1.0 - (2.0 * rho * z) + math.pow(z, 2.0)) + z - rho) / (1.0 - rho))
+
+        i = num / den
+
+    return i
 
 
 def I1(alpha, beta, rho, Vv, K, f0):
