@@ -424,11 +424,13 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
 
     vol = getVolatility(premium, D, quote);
 
-    plotQuotes(quote, vol);
-    plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+    LMA.LMA(quote, vol, beta)
 
-    if Vv == 0:
-        print(MeanResidualsBS(vol,alpha))
+    #plotQuotes(quote, vol);
+    #plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+
+    #if Vv == 0:
+    #    print(MeanResidualsBS(vol,alpha))
 
 
     #print("Fitting SABR...")
@@ -436,12 +438,6 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
     #plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
 
-def TestLMA(T, f0, D, alpha, beta, rho, Vv, numquotes):
-
-
-    quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)
-
-    LMA.LMA(quote, beta)
 
 
 
@@ -492,9 +488,8 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 
 #DynamicSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, time, numSimulations)
 
-#cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
-TestLMA(T, f0, D, alpha, beta, rho, Vv, numquotes)
 
 axes = plt.gca()
 #axes.set_ylim([0, 0.25])
