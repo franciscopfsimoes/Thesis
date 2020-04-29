@@ -49,7 +49,7 @@ def dVoldAlpha(alpha, beta, rho, Vv, K, f, T, h):
 
 def dVoldRho(alpha, beta, rho, Vv, K, f, T, h):
 
-    d = 1000 * vol(alpha, beta, rho + h, Vv, K, f, T) - vol(alpha, beta, rho - h, Vv, K, f, T)/2*h
+    d = vol(alpha, beta, rho + h, Vv, K, f, T) - vol(alpha, beta, rho - h, Vv, K, f, T)/2*h
 
     return d
 
@@ -86,15 +86,15 @@ def diferenceVector(quote, v, alpha, rho, Vv, beta):
 
     sabrvol = []
 
-    np.asarray(v)
+    np.asarray([v])
 
     for i in np.arange(len(strike)):
 
         sabrvol.append(vol(alpha, beta, rho, Vv, strike[i], f[i], duration[i]))
 
-    sabr = np.asarray(sabrvol)
+    sabr = np.asarray([sabrvol])
 
-    Y = np.subtract(v, sabr)
+    Y = np.transpose(np.subtract(v, sabr))
 
     return Y
 
@@ -107,15 +107,7 @@ def LMA (quotes, vol, beta):
 
     Vv = 0.3
 
-    Lambda = 1000
-
-    count = 0  # cycle counter
-
-    maxiter = 1000  # maximum number of cycles
-
-    epsilon = 1  # initial value for the error epsilon
-
-    tol = 1e-3  # break condition for the size of epsilon
+    Lambda = 1
 
     JT = NumericJacobian(quotes, alpha, rho, Vv, beta) #jacobian transposed
 
@@ -127,13 +119,4 @@ def LMA (quotes, vol, beta):
 
     h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
 
-    print(h.shape)
     print(h)
-
-
-    while epsilon > tol:  # Newton-Raphson's method
-
-        count += 1  # increase counter
-
-        if count >= maxiter:  # break condition for the maximum number of cycles
-            break;
