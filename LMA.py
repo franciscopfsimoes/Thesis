@@ -98,8 +98,24 @@ def diferenceVector(quote, v, alpha, rho, Vv, beta):
 
     return Y
 
+def getStep(quote, vol, alpha, rho, Vv, beta, Lambda):
 
-def LMA (quotes, vol, beta):
+    JT = NumericJacobian(quote, alpha, rho, Vv, beta)  # jacobian transposed
+
+    H = np.matmul(JT, np.transpose(JT))
+
+    diagH = np.diag(np.diagonal(H))
+
+    A = H + Lambda * diagH
+
+    Y = diferenceVector(quote, vol, alpha, rho, Vv, beta)
+
+    h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
+
+    return h
+
+
+def LMA (quote, vol, beta):
 
     alpha = 0.05
 
@@ -107,16 +123,8 @@ def LMA (quotes, vol, beta):
 
     Vv = 0.3
 
-    Lambda = 1
+    Lambda = 1000
 
-    JT = NumericJacobian(quotes, alpha, rho, Vv, beta) #jacobian transposed
+    h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda)
 
-    H = np.matmul(JT, np.transpose(JT))
-
-    A = np.add(H, Lambda * np.diagonal(H))
-
-    Y = diferenceVector(quotes, vol, alpha, rho, Vv, beta)
-
-    h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
-
-    print(H)
+    print(h)
