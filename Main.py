@@ -11,6 +11,7 @@ import scipy.stats
 import Black
 import SABR
 import Estimating
+import LMA
 
 
 def foward(S, D, T): #computes foward from spot price
@@ -331,8 +332,6 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical
         sabrvol.append(vi)
         K.append(float(k/f0))
 
-    print(np.linspace(lb, ub, num = 20), sabrvol)
-
     plt.plot(K, sabrvol, "--", label='theoretical SABR')
 
 def plotQuotes(quote, vol): #plots a list of quotes
@@ -436,6 +435,16 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
     #ARV = getParameters(beta, quote, vol);
     #plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
+
+def TestLMA(T, f0, D, alpha, beta, rho, Vv, numquotes):
+
+
+    quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)
+
+    LMA.LMA(quote, beta)
+
+
+
 ##### PLOT EXAMPLES ####
 def figure1():
     exampleSABRVolSmile(0.036698, 0.5, 0.098252, 0.599714, 0.07, 0)
@@ -483,7 +492,9 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 
 #DynamicSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, time, numSimulations)
 
-cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+#cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+
+TestLMA(T, f0, D, alpha, beta, rho, Vv, numquotes)
 
 axes = plt.gca()
 #axes.set_ylim([0, 0.25])
