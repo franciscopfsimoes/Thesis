@@ -119,4 +119,4 @@ def LMA (quotes, vol, beta):
 
     h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
 
-    print(h)
+    print(H)
