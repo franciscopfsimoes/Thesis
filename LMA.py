@@ -49,7 +49,7 @@ def dVoldAlpha(alpha, beta, rho, Vv, K, f, T, h):
 
 def dVoldRho(alpha, beta, rho, Vv, K, f, T, h):
 
-    d = vol(alpha, beta, rho + h, Vv, K, f, T) - vol(alpha, beta, rho - h, Vv, K, f, T)/2*h
+    d = 1000 * vol(alpha, beta, rho + h, Vv, K, f, T) - vol(alpha, beta, rho - h, Vv, K, f, T)/2*h
 
     return d
 
@@ -76,18 +76,38 @@ def NumericJacobian(quote, alpha, rho, Vv, beta):
         dRho.append(dVoldRho(alpha, beta, rho, Vv, strike[i], f[i], duration[i], h))
         dVv.append(dVoldVv(alpha, beta, rho, Vv, strike[i], f[i], duration[i], h))
 
-    J = np.transpose(np.asmatrix(np.asarray([dAlpha, dRho,dVv])))
+    JT = np.asmatrix(np.asarray([dAlpha, dRho,dVv]))
 
-    return J
+    return JT
+
+def diferenceVector(quote, v, alpha, rho, Vv, beta):
+
+    f, duration, strike = quote[0], quote[2], quote[3]
+
+    sabrvol = []
+
+    np.asarray(v)
+
+    for i in np.arange(len(strike)):
+
+        sabrvol.append(vol(alpha, beta, rho, Vv, strike[i], f[i], duration[i]))
+
+    sabr = np.asarray(sabrvol)
+
+    Y = np.subtract(v, sabr)
+
+    return Y
 
 
-def LMA (quotes, beta):
+def LMA (quotes, vol, beta):
 
     alpha = 0.05
 
     rho = -0.4
 
     Vv = 0.3
+
+    Lambda = 1000
 
     count = 0  # cycle counter
 
@@ -97,8 +117,18 @@ def LMA (quotes, beta):
 
     tol = 1e-3  # break condition for the size of epsilon
 
-    J = NumericJacobian(quotes, alpha, rho, Vv, beta)
+    JT = NumericJacobian(quotes, alpha, rho, Vv, beta) #jacobian transposed
 
+    H = np.matmul(JT, np.transpose(JT))
+
+    A = np.add(H, Lambda * np.diagonal(H))
+
+    Y = diferenceVector(quotes, vol, alpha, rho, Vv, beta)
+
+    h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
+
+    print(h.shape)
+    print(h)
 
 
     while epsilon > tol:  # Newton-Raphson's method
