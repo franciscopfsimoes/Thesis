@@ -488,7 +488,9 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 
 #DynamicSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, time, numSimulations)
 
-cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+#cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+
+TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
 
 
 axes = plt.gca()
