@@ -167,7 +167,7 @@ def LMA (quote, vol, beta):
 
     Vv = 0.3
 
-    Lambda = 1000
+    Lambda = 100
 
     JT = NumericJacobian(quote, alpha, rho, Vv, beta)
 
@@ -179,4 +179,18 @@ def LMA (quote, vol, beta):
 
     i = Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h)
 
-    print(i)
+    print(Lambda)
+
+    if i:
+        hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
+
+        alpha, rho, Vv = alpha + hAlpha, rho + hRho, Vv + hVv
+
+        Lambda = max(Lambda / 9, 10 **(-7))
+
+    else:
+
+        Lambda = min(Lambda * 11, 10 **(7))
+
+    print(Lambda)
+
