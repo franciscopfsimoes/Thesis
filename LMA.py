@@ -98,11 +98,11 @@ def diferenceVector(quote, v, alpha, rho, Vv, beta):
 
     return Y
 
-def getStep(quote, vol, alpha, rho, Vv, beta, Lambda):
+def getStep(quote, vol, alpha, rho, Vv, beta, Lambda, W):
 
     JT = NumericJacobian(quote, alpha, rho, Vv, beta)  # jacobian transposed
 
-    H = np.matmul(JT, np.transpose(JT))
+    H = np.matmul(JT, np.matmul(W, np.transpose(JT)))
 
     diagH = np.diag(np.diagonal(H))
 
@@ -110,10 +110,30 @@ def getStep(quote, vol, alpha, rho, Vv, beta, Lambda):
 
     Y = diferenceVector(quote, vol, alpha, rho, Vv, beta)
 
-    h = np.matmul(np.linalg.inv(A), np.matmul(JT, Y))
+    h = np.matmul(np.linalg.inv(A), np.matmul(JT, np.matmul(W, Y)))
 
     return h
 
+
+def Chi2(quote, vol, alpha, rho, Vv, beta, W):
+
+    Y = diferenceVector(quote, vol, alpha, rho, Vv, beta)
+
+    X = float(np.matmul(np.transpose(Y), np.matmul(W, Y)))
+
+    return X
+
+def WeightMatrix(vol):
+
+    l = len(vol)
+
+    w = np.ones((1, l))
+
+    W = np.zeros((l, l), int)
+
+    np.fill_diagonal(W, w)
+
+    return W
 
 def LMA (quote, vol, beta):
 
@@ -125,6 +145,10 @@ def LMA (quote, vol, beta):
 
     Lambda = 1000
 
-    h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda)
+    W = WeightMatrix(vol)
 
-    print(h)
+    h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda, W)
+
+    X = Chi2(quote, vol, alpha, rho, Vv, beta, W)
+
+    print(X, h)
