@@ -141,7 +141,7 @@ def WeightMatrix(vol):
 
 def Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h):
 
-    eps = 0.5
+    eps = 10**(-1)
 
     hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
 
@@ -159,38 +159,72 @@ def Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h):
 
     return r > eps
 
+def Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h):
+
+    eps1, eps2, eps3 = 10**(-3), 10**(-3), 10 **(-3)
+
+    hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
+
+    Y = diferenceVector(quote, vol, alpha, rho, Vv, beta)
+
+    A = np.matmul(JT , np.matmul(W, Y))
+
+    l = len(vol)
+
+    E1 = np.amax(np.absolute(A))
+
+    E2 = max(abs(hAlpha/alpha), abs(hRho/rho), abs(hVv/ Vv))
+
+    E3 = Chi2(quote, vol, alpha, rho, Vv, beta, W)/ (l - 3 + 1)
+
+    print(E1, E2, E3)
+
+    return E1 < eps1 or E2 < eps2 or E3 < eps3
+
+
 def LMA (quote, vol, beta):
 
-    alpha = 0.05
+    alpha = 0.07
 
-    rho = -0.4
+    rho = -0.5
 
-    Vv = 0.3
+    Vv = 0.4
 
-    Lambda = 100
+    Lambda = 10*(-2)
 
-    JT = NumericJacobian(quote, alpha, rho, Vv, beta)
+    maxIter = 30
 
-    W = WeightMatrix(vol)
+    counter = 1
 
-    h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT)
+    while counter < maxIter:
 
-    X = Chi2(quote, vol, alpha, rho, Vv, beta, W)
+        print("par:", alpha, rho, Vv)
 
-    i = Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h)
+        JT = NumericJacobian(quote, alpha, rho, Vv, beta)
 
-    print(Lambda)
+        W = WeightMatrix(vol)
 
-    if i:
-        hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
+        h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT)
 
-        alpha, rho, Vv = alpha + hAlpha, rho + hRho, Vv + hVv
+        i = Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h)
 
-        Lambda = max(Lambda / 9, 10 **(-7))
+        if i:
+            hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
 
-    else:
+            alpha, rho, Vv = alpha + hAlpha, rho + hRho, Vv + hVv
 
-        Lambda = min(Lambda * 11, 10 **(7))
+            Lambda = max(Lambda / 9, 10 **(-7))
 
-    print(Lambda)
+            c = Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h)
 
+            if c:
+                break
+
+        else:
+
+            Lambda = min(Lambda * 11, 10 **(7))
+
+
+        counter += 1
+
+    print(counter)
