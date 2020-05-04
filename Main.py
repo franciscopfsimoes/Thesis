@@ -12,6 +12,7 @@ import Black
 import SABR
 import Estimating
 import LMA
+import Eval
 
 
 def foward(S, D, T): #computes foward from spot price
@@ -395,18 +396,6 @@ def exampleSABRVolSmile(alpha, beta, rho, Vv, f0, T):
 
     plt.plot(K, sabrvol, label='fitted SABR')
 
-def MeanResidualsBS(vol, alpha):
-
-    sum = 0
-
-    for v in vol:
-
-        sum = sum + abs(v - alpha)
-
-    mean = sum / len(vol)
-
-    return mean
-
 
     #############################MAIN FUNCTIONS###############################
 
@@ -419,7 +408,7 @@ def DynamicSimulation(T, f0, alpha, beta, rho, Vv, numquotes, time, numSimulatio
 
     quote = dynamicQuotes(T, f0, alpha, beta, rho, Vv, numquotes, time)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
-    price = getPrice(quote, beta, rho, Vv, numSimulations, numSimulations);
+    price = getPrice(quote, beta, rho, Vv, numSimulations, numSimulations)
     premium = price
 
     vol = getVolatility(premium, quote);
@@ -439,17 +428,18 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
 
     vol = getVolatility(premium, D, quote);
 
+
     plotQuotes(quote, vol);
     plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
-    #if Vv == 0:
-    #    print(MeanResidualsBS(vol,alpha))
-
-
     print("Fitting SABR...")
+
     ARVG = getParameters(beta, quote, vol)
+    print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
     plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
+
     ARVL = LMA.LMA(quote, vol, beta)
+    print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
     plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
 
 
@@ -484,12 +474,12 @@ def figure3():
 ##############################MAIN BODY######################################################
 
 
-numSimulations = 10000 #number of simulations per quote in montecarlo
+numSimulations = 100000 #number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
 T = 15 #time to maturity
 f0 = 0.0801 #foward at time t = 0
-alpha = 0.0425 #alpha
+alpha = 0.05 #alpha
 beta = 1 #beta
 rho = -0.33 #rho
 Vv = 0.25 #volatility of volatility
