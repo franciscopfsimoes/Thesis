@@ -324,7 +324,7 @@ def plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plots theoretical
     sabrvol = []
     K = []
 
-    lb = 0.5*f0; ub = 1.5*f0
+    lb = 0.01*f0; ub = 1.5*f0
 
     for k in np.linspace(lb, ub, num = 101):
 
@@ -349,20 +349,35 @@ def plotQuotes(quote, vol): #plots a list of quotes
             plt.plot(Kf0[i], vol[i], ms = 4, c = 'b', marker = '^')
 
 
-def plotFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
+def plotGridFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
 
     sabrvol = []
     K = []
 
-    lb = 0.7 * f0;
-    ub = 1.4 * f0
+    lb = 0.01 * f0;
+    ub = 1.5 * f0
 
     for k in np.linspace(lb, ub, num=101):
         vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
         sabrvol.append(vi)
         K.append(float(k / f0))
 
-    plt.plot(K, sabrvol, label='fitted SABR')
+    plt.plot(K, sabrvol, label='fitted Grid SABR')
+
+def plotLMAFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
+
+    sabrvol = []
+    K = []
+
+    lb = 0.01 * f0;
+    ub = 1.5 * f0
+
+    for k in np.linspace(lb, ub, num=101):
+        vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
+        sabrvol.append(vi)
+        K.append(float(k / f0))
+
+    plt.plot(K, sabrvol, label='fitted LMA SABR')
 
 def exampleSABRVolSmile(alpha, beta, rho, Vv, f0, T):
 
@@ -413,7 +428,7 @@ def DynamicSimulation(T, f0, alpha, beta, rho, Vv, numquotes, time, numSimulatio
     plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
     ARV = getParameters(beta, quote, vol);
-    plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
+    plotGridFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
 def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #produces simutaneous quotes evenly spaced and evaluates the SABR fitting
 
@@ -424,20 +439,18 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
 
     vol = getVolatility(premium, D, quote);
 
-    LMA.LMA(quote, vol, beta)
-
-    #plotQuotes(quote, vol);
-    #plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+    plotQuotes(quote, vol);
+    plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
     #if Vv == 0:
     #    print(MeanResidualsBS(vol,alpha))
 
 
-    #print("Fitting SABR...")
-    #ARV = getParameters(beta, quote, vol);
-    #plotFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
-
-
+    print("Fitting SABR...")
+    ARVG = getParameters(beta, quote, vol)
+    plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
+    ARVL = LMA.LMA(quote, vol, beta)
+    plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
 
 
 
@@ -494,8 +507,8 @@ TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
 
 
 axes = plt.gca()
-#axes.set_ylim([0, 0.25])
-axes.set_xlim([0.4, 1.6])
+axes.set_ylim([0, 0.5])
+#axes.set_xlim([0.05, 1.5])
 plt.legend(loc='best')
 plt.show()
 
