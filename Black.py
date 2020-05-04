@@ -45,7 +45,7 @@ def Vol(f, K, T, p, D, iscall): #Returns Black-Scholes' implied volatility using
 
     #initial conditions of Newton-Raphson's method
 
-    vol = 0.5 # initial value for the volatility
+    vol = math.sqrt(6.28/T)*p/(f*D) # initial value for the volatility
 
     count = 0 #cycle counter
 
