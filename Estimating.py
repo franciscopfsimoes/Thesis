@@ -21,7 +21,7 @@ def spot(f, mu, T):
 ######################################Estimating alpha, rho and Vv############################
 
 def ARV(beta, strike, fprice, duration, vol):
-    alphaub = 2 #alpha upper bound
+    alphaub = 1 #alpha upper bound
     alphalb = 0.01 #alpha lower bound
     alphastep = 0.01  #alpha increment step
 
@@ -29,8 +29,8 @@ def ARV(beta, strike, fprice, duration, vol):
     rholb = -0.9 #rho lower bound
     rhostep = 0.1 #rho increment step
 
-    Vvub = 2 #Vv upper bound
-    Vvlb = 0 #Vv lower bound
+    Vvub = 1 #Vv upper bound
+    Vvlb = 0.01 #Vv lower bound
     Vvstep = 0.01 #Vv incrment step
 
     i = 0
@@ -66,7 +66,7 @@ def ARV(beta, strike, fprice, duration, vol):
 
                     Vvopt = Vv
 
-    print("your optimal parameters are alpha:", alphaopt, " rho:", rhoopt, " Vv:", Vvopt)
+    print("Grid parameters:", alphaopt, rhoopt, Vvopt)
 
     opt = (alphaopt, rhoopt, Vvopt)
 
