@@ -1,6 +1,7 @@
 import numpy as np
 
 from SABR import impVol as vol
+import SABR
 
 
 def d2VoldAlpha2(alpha, beta, rho, Vv, K, f, T, h):
@@ -127,7 +128,17 @@ def Chi2(quote, vol, alpha, rho, Vv, beta, W):
 
     return X
 
-def WeightMatrix(vol):
+def VAR(vol, quote, alpha, beta, rho, Vv):
+
+    f, duration, strike = quote[0], quote[2], quote[3]
+
+    Y = diferenceVector(quote, vol, alpha, rho, Vv, beta)
+
+    Var = 1/(len(strike) - 3 + 1)  * float(np.matmul(np.transpose(Y), Y))
+
+    return Var
+
+def WeightMatrix(vol ,Var):
 
     l = len(vol)
 
@@ -136,6 +147,8 @@ def WeightMatrix(vol):
     W = np.zeros((l, l), int)
 
     np.fill_diagonal(W, w)
+
+    W = 1/Var * W
 
     return W
 
@@ -176,7 +189,7 @@ def Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h):
 
 def Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h):
 
-    eps1, eps2, eps3 = 10**(-3), 10**(-3), 10 **(-4)
+    eps1, eps2, eps3 = 10**(-3), 10**(-4), 10 **(-4)
 
     hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
 
@@ -214,7 +227,9 @@ def LMA (quote, vol, beta):
 
         JT = NumericJacobian(quote, alpha, rho, Vv, beta)
 
-        W = WeightMatrix(vol)
+        Var = VAR(vol, quote, alpha, beta, rho, Vv)
+
+        W = WeightMatrix(vol, Var)
 
         h = getStep(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT)
 
@@ -253,6 +268,6 @@ def LMA (quote, vol, beta):
 
     print("LMA parameters:", alpha, rho, Vv)
 
-    print(counter)
+    print("LMA iterations:", counter)
 
     return alpha, rho, Vv
