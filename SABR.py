@@ -1,5 +1,5 @@
 import math
-
+'''
 #Auxiliary functions
 def A1(alpha, beta, f, K):
 
@@ -116,4 +116,3 @@ def I1(alpha, beta, rho, Vv, K, f0):
 def impVol(alpha, beta, rho, Vv, K, f0, T):
 
     return I0(alpha, beta, rho, Vv, K, f0) * (1 + I1(alpha, beta, rho, Vv, K, f0) * T)
-'''
