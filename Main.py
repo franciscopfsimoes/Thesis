@@ -13,6 +13,7 @@ import SABR
 import Estimating
 import LMA
 import Eval
+import SmartParameters as SP
 
 
 def foward(S, D, T): #computes foward from spot price
@@ -419,7 +420,7 @@ def DynamicSimulation(T, f0, alpha, beta, rho, Vv, numquotes, time, numSimulatio
     ARV = getParameters(beta, quote, vol);
     plotGridFittedSABRVolSmile(ARV[0], beta, ARV[1], ARV[2], f0, T)
 
-def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #produces simutaneous quotes evenly spaced and evaluates the SABR fitting
+def QuoteTestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #produces simutaneous quotes evenly spaced and evaluates the SABR fitting
 
     quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
@@ -432,16 +433,33 @@ def TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #
     plotQuotes(quote, vol);
     plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
+
+def LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations): #produces simutaneous quotes evenly spaced and evaluates the SABR fitting
+
+    quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
+
+    price = getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations);
+    premium = price
+
+    vol = getVolatility(premium, D, quote);
+
+
+    plotQuotes(quote, vol);
+    plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
+
+    ARVSP = SP.SmartParameters(quote, vol, beta)
+
+    alpha0, rho0, Vv0 = ARVSP[0], ARVSP[1], ARVSP[2]
+
     print("Fitting SABR...")
 
-    ARVG = getParameters(beta, quote, vol)
-    print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
-    plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
+    #ARVG = getParameters(beta, quote, vol)
+    #print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
+    #plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
 
-    ARVL = LMA.LMA(quote, vol, beta)
+    ARVL = LMA.LMA(quote, vol, beta, alpha0, rho0, Vv0)
     print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
     plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
-
 
 
 ##### PLOT EXAMPLES ####
@@ -474,13 +492,13 @@ def figure3():
 ##############################MAIN BODY######################################################
 
 
-numSimulations = 100000 #number of simulations per quote in montecarlo
+numSimulations = 10000#number of simulations per quote in montecarlo
 numSteps = 1000 #number of time steps per simulations
 
 T = 15 #time to maturity
 f0 = 0.0801 #foward at time t = 0
 alpha = 0.05 #alpha
-beta = 1 #beta
+beta = 0.4 #beta
 rho = -0.33 #rho
 Vv = 0.25 #volatility of volatility
 D = 1 #discount rate
@@ -491,13 +509,15 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 
 #DynamicSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, time, numSimulations)
 
-#cProfile.run('TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+#QuoteTestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
 
-TestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
+#cProfile.run('LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
+
+LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
 
 
 axes = plt.gca()
-axes.set_ylim([0, 0.5])
+#axes.set_ylim([0, 0.5])
 #axes.set_xlim([0.05, 1.5])
 plt.legend(loc='best')
 plt.show()
