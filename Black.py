@@ -47,6 +47,9 @@ def Vol(f, K, T, p, D, iscall): #Returns Black-Scholes' implied volatility using
 
     vol = math.sqrt(6.28/T)*p/(f*D) # initial value for the volatility
 
+    if vol == 0:
+        vol = 0.01
+
     count = 0 #cycle counter
 
     maxiter= 1000 #maximum number of cycles
