@@ -189,7 +189,7 @@ def Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h):
 
 def Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h):
 
-    eps1, eps2, eps3 = 10**(-3), 10**(-4), 10 **(-4)
+    eps1, eps2, eps3 = 10**(-2), 10**(-2), 10 **(-1)
 
     hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
 
@@ -208,22 +208,15 @@ def Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h):
     return E1 < eps1 or E2 < eps2 or E3 < eps3
 
 
-def LMA (quote, vol, beta):
-
-    alpha = 0.05
-
-    rho = -0.2
-
-    Vv = 0.4
+def LMA (quote, vol, beta, alpha, rho, Vv):
 
     Lambda = 10*(-2)
 
-    maxIter = 20
+    maxIter = 30
 
     counter = 1
 
     while counter < maxIter:
-
 
         JT = NumericJacobian(quote, alpha, rho, Vv, beta)
 
