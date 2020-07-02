@@ -19,15 +19,14 @@ def rhoplus(alpha, beta, Vv, T, f, sigma):
 
 def rhominus(alpha, beta, Vv, T, f, sigma):
 
-
     r = (6 * alpha ** (3 / 2) * beta * (f ** 2) ** beta - (f ** (-beta / 2) * (-72 * f ** 5 * sigma +
-                                                                           3 * alpha ** 3 * f ** beta * (
-                                                                                   f ** 2) ** beta * ((
-                                                                                                                  -1 + beta) ** 2 * f ** 2 + 12 * beta ** 2*(
-                f ** 2) ** beta) * T +
-                                                                           6 * alpha * f ** (4 + beta) * (
+                                                                               3 * alpha ** 3 * f ** beta * (
+                                                                                       f ** 2) ** beta * ((
+                                                                                                                  -1 + beta) ** 2 * f ** 2 + 12 * beta ** 2 * (
+                                                                                                                  f ** 2) ** beta) * T +
+                                                                               6 * alpha * f ** (4 + beta) * (
                                                                                        12 + T * Vv ** 2)) ** 0.5 / (
-                                                           T) ** 0.5)) / (3 * (alpha) ** 0.5 * f ** 2 * Vv)
+                                                               T) ** 0.5)) / (3 * (alpha) ** 0.5 * f ** 2 * Vv)
     return r
 
 def LbAlpha(beta, Vv, T, f, sigma):
@@ -49,7 +48,7 @@ def UbAlpha(beta, Vv, T, f, sigma):
 
     sol = solve(alpha * K ** (beta - 1) * (1 + ((1 / 24.0) * (beta - 1)**2 * alpha**2 / ((f * K) ** (1 - beta)) + (1 / 4.0) * alpha * beta * Vv * rho / ((f * K)**((1 - beta) / 2)) + (1 / 24.0) * Vv**2.0 * (2.0 - 3.0 * rho**2.0))*T) - sigma, alpha)
 
-    return sol[0]
+    return float(sol[0])
 
 
 def getAtTheMoneyCurve(f, K, v):
@@ -72,12 +71,6 @@ def getAtTheMoneyCurve(f, K, v):
     vol = np.asarray(vol)
 
     z = np.polyfit(kf, vol, 2)
-
-    p = np.poly1d(z)
-
-    xp = np.linspace(0.5, 1.5, 100)
-
-    _ = plt.plot(xp, p(xp), "-")
 
     ATM = z[0] + z[1] + z[2]
 
@@ -140,6 +133,26 @@ def differencedVdSigma(alpha, beta, rho, Vv, T, f, dSigma):
 
     return fun
 
+def derivImpIntervalAlpha(lb, ub, beta, Vv, T, f, sigma):
+
+    deriv = []
+
+    A = np.linspace(lb, ub, num=5)
+
+    for alpha in A:
+
+        rho = rhominus(alpha, beta, Vv, T, f, sigma)
+
+        fun = 1 / 24 * alpha * (-1 + beta) * f ** (-4 + beta) * (
+                    2 * alpha * (f ** 2) ** beta * T * (alpha * (-1 + beta) ** 2 + 12 * beta * rho * Vv) + f ** 2 * (
+                        24 + (2 - 3 * rho ** 2) * T * Vv ** 2))
+
+        deriv.append(fun)
+
+    print(deriv)
+
+    return deriv
+
 def getBoundsAlpha(beta, Vv, T, f, sigma):
 
     lb = LbAlpha(beta, Vv, T, f, sigma)
@@ -147,8 +160,6 @@ def getBoundsAlpha(beta, Vv, T, f, sigma):
     ub = UbAlpha(beta, Vv, T, f, sigma)
 
     return lb, ub
-
-
 
 def getAlpha(beta, Vv, T, f, sigma, dSigma, lb, ub):
 
@@ -160,23 +171,13 @@ def getAlpha(beta, Vv, T, f, sigma, dSigma, lb, ub):
 
     for a in A:
 
-        rhop = rhoplus(a, beta, Vv, T, f, sigma)
-
         rhom = rhominus(a, beta, Vv, T, f, sigma)
 
-        diffp = differencedVdSigma(a, beta, rhop, Vv, T, f, dSigma)
+        diff = abs(differencedVdSigma(a, beta, rhom, Vv, T, f, dSigma))
 
-        diffm = differencedVdSigma(a, beta, rhom, Vv, T, f, dSigma)
+        if diff < opt:
 
-        if diffp < opt:
-
-            opt = diffp
-
-            alpha = a
-
-        if diffm < opt:
-
-            opt = diffm
+            opt = diff
 
             alpha = a
 
@@ -190,7 +191,13 @@ def SmartParameters(quote, vol, beta):
 
     f, duration, strike = quote[0], quote[2], quote[3]
 
-    Vv = 0.25
+    maxIter = 20
+
+    counter = 0
+
+    eps = 0.1
+
+    Vv = 0.01
 
     meanf = np.mean(f)
 
@@ -216,27 +223,37 @@ def SmartParameters(quote, vol, beta):
 
         alpha = float(getAlpha(beta, Vv, meanT, meanf, sigmaATM, dSigmadKATM, lb, ub))
 
-        rho = rhominus(alpha, beta, Vv, meanT, meanf, sigmaATM)
+        if alpha < 0:
 
-        difflb = differencedVdSigma(lb, beta, rho, Vv, meanT, meanf, dSigmadKATM)
+            deriv = derivImpIntervalAlpha(lb, ub, beta, Vv, meanT, meanf, sigmaATM)
 
-        diffub = differencedVdSigma(ub, beta, rho, Vv, meanT, meanf, dSigmadKATM)
+            mina = np.min(deriv) - dSigmadKATM
 
-        if alpha > 0:
+            maxa = np.max(deriv) - dSigmadKATM
+
+            print("Min_Alpha ImpVol derivative: ", mina, " max_Alpha ImpVol derivative: ", maxa, " dSigma;", dSigmadKATM)
+
+            if mina > 0:
+
+                Vv = Vv / 1.2
+
+                print("Vv update -:", Vv)
+
+
+            elif maxa < 0:
+
+                Vv = Vv * 1.2
+
+                print("Vv update +:", Vv)
+
+            else:
+
+                print("Error: alpha bounds incoherent")
+                break
+
+        else:
 
             break
-
-        elif difflb < 0:
-
-            Vv = Vv/1.2
-
-            print("Vv update -:", Vv)
-
-        elif diffub > 0:
-
-            Vv = Vv*1.2
-
-            print("Vv update +:", Vv)
 
     print("Alpha:", alpha)
 
