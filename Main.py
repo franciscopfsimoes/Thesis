@@ -14,6 +14,7 @@ import Estimating
 import LMA
 import Eval
 import SmartParameters as SP
+import Bayesian as Bayes
 
 
 def foward(S, D, T): #computes foward from spot price
@@ -115,7 +116,7 @@ def pathPlot(numSteps, path): #plots v and f path
 
 def randStrike(f0): #generates a random strike normally distributed around f0
 
-    dK = float(np.random.normal(0, 0.30, 1)) * f0
+    dK = float(np.random.normal(0, 0.1, 1)) * f0
 
     K = f0 + dK
 
@@ -201,6 +202,33 @@ def instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes): #generates simultan
 
     return f, vol, duration, strike, type
 
+def singleQuote(T, f0, alpha):
+
+
+    f = []
+
+    f.append(f0)
+
+    vol = []
+
+    vol.append(alpha)
+
+    duration = []
+
+    duration.append(T)
+
+    strike = []
+
+    strike.append(randStrike(f0))
+
+    type = []
+
+    type.append(1)
+
+    return f, vol, duration, strike, type
+
+
+
 def valueAtMaturity(f, K, type): #evaluates a the value of a option ate maturity
 
     if type == 0:
@@ -279,6 +307,28 @@ def getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations): #return
     price = [s / numSimulations for s in sum]
 
     return price
+
+
+def getOverTheLinePrices(quote, D, alpha, beta, rho, Vv): #returns prices of a list of test (simutaneous) quotes
+
+    f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
+
+    price = []
+
+    i = 0
+
+    while i < len(strike):
+
+        v = SABR.impVol(vol[i], beta, rho, Vv, strike[i], f0[i], duration[i])
+
+        p = Black.Price(f0[i], strike[i], duration[i], v, D, type[i])
+
+        price.append(p)
+
+        i += 1
+
+    return price
+
 
 def getVolatility(price, D, quote): #returns implied volatilities of a list of priced quotes
 
@@ -381,6 +431,21 @@ def plotLMAFittedSABRVolSmile(alpha, beta, rho, Vv, f0, T): #plot fitted SABR cu
 
     plt.plot(K, sabrvol, label='fitted LMA SABR')
 
+def plotLMAFittedSABRVolSmileOutliers(alpha, beta, rho, Vv, f0, T): #plot fitted SABR curve
+
+    sabrvol = []
+    K = []
+
+    lb = 0.01 * f0;
+    ub = 1.5 * f0
+
+    for k in np.linspace(lb, ub, num=101):
+        vi = SABR.impVol(alpha, beta, rho, Vv, k, f0, T)
+        sabrvol.append(vi)
+        K.append(float(k / f0))
+
+    plt.plot(K, sabrvol, label='fitted Outliers LMA SABR')
+
 def exampleSABRVolSmile(alpha, beta, rho, Vv, f0, T):
 
     sabrvol = []
@@ -425,6 +490,7 @@ def QuoteTestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulation
     quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
     price = getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations);
+
     premium = price
 
     vol = getVolatility(premium, D, quote);
@@ -438,7 +504,10 @@ def LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
 
     quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv, numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
 
-    price = getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations);
+    #price = getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations);
+
+    price = getOverTheLinePrices(quote, D, alpha, beta, rho, Vv)
+
     premium = price
 
     vol = getVolatility(premium, D, quote);
@@ -447,9 +516,9 @@ def LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
     plotQuotes(quote, vol);
     plotTheoreticalSABRVolSmile(alpha, beta, rho, Vv, f0, T)
 
-    ARVSP = SP.SmartParameters(quote, vol, beta)
+    #ARVSP = SP.SmartParameters(quote, vol, beta)
 
-    alpha0, rho0, Vv0 = ARVSP[0], ARVSP[1], ARVSP[2]
+    #alpha0, rho0, Vv0 = ARVSP[0], ARVSP[1], ARVSP[2]
 
     print("Fitting SABR...")
 
@@ -457,9 +526,91 @@ def LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
     #print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
     #plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
 
-    ARVL = LMA.LMA(quote, vol, beta, alpha0, rho0, Vv0)
-    print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
-    plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
+    #ARVL = LMA.LMA(quote, vol, beta, alpha0, rho0, Vv0)
+    #print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
+    #plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
+
+
+def BayesianTest(T, f0, D, alpha0, beta, rho, Vv, numSimulations):
+
+    alpha = 0.07
+
+    alphaStdDev = 0.1
+
+    for i in range(5):
+
+        quote = singleQuote(T, f0, alpha0)
+
+        price = getPrice(quote, beta, rho, Vv, numSimulations)
+
+        impVol = getVolatility(price, D, quote)
+
+        alpha, alphaStdDev = Bayes.Bayesian(alpha, beta, alphaStdDev, quote, impVol)
+
+        print(quote)
+
+        print(alpha, alphaStdDev)
+
+def OutliersTest(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations):
+
+
+	quote = instaTestQuotes(T, f0, alpha, beta, rho, Vv,
+							numquotes)  # f0, vol, duration, strike, type = quote[0], quote[1], quote[2], quote[3], quote[4]
+
+	price = getPriceSimultaneousQuotes(quote, D, beta, rho, Vv, numSimulations);
+
+	premium = price
+
+	vol = getVolatility(premium, D, quote);
+
+	#ARVSP = SP.SmartParameters(quote, vol, beta)
+
+	#alpha0, rho0, Vv0 = ARVSP[0], ARVSP[1], ARVSP[2]
+
+	alpha0, rho0, Vv0 = 0.05, -0.3, 0.5
+
+	print("Fitting SABR...")
+
+	'''
+	ARVG = getParameters(beta, quote, vol)
+	print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
+	plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
+	'''
+
+	ARVL = LMA.LMA(quote, vol, beta, alpha0, rho0, Vv0)
+	print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
+	plotLMAFittedSABRVolSmile(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
+
+
+	random.seed(1)
+
+	sequence = [i for i in range(numquotes)]
+
+	subset = random.sample(sequence, 5)
+
+	print(subset)
+
+
+	for i in subset:
+
+		vol[i] = vol[i]*(1 + np.random.normal(0, 1, 1))
+
+	print("Fitting SABR...")
+
+	'''
+	ARVG = getParameters(beta, quote, vol)
+	print("Grid method mean residuals:", Eval.MeanResiduals(vol, quote, ARVG[0], beta, ARVG[1], ARVG[2]))
+	plotGridFittedSABRVolSmile(ARVG[0], beta, ARVG[1], ARVG[2], f0, T)
+	'''
+	ARVL = LMA.LMA(quote, vol, beta, alpha0, rho0, Vv0)
+	print("LMA method mean residuals:", Eval.MeanResiduals(vol, quote, ARVL[0], beta, ARVL[1], ARVL[2]))
+	plotLMAFittedSABRVolSmileOutliers(ARVL[0], beta, ARVL[1], ARVL[2], f0, T)
+
+	plotQuotes(quote, vol);
+
+
+
+
 
 
 ##### PLOT EXAMPLES ####
@@ -500,7 +651,7 @@ f0 = 0.0801 #foward at time t = 0
 alpha = 0.05 #alpha
 beta = 0.4 #beta
 rho = -0.33 #rho
-Vv = 0.25 #volatility of volatility
+Vv = 0.5 #volatility of volatility
 D = 1 #discount rate
 
 numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simulate over which period of time
@@ -513,7 +664,13 @@ numquotes, time = 20, 1/365 #in case of day simulation how many quotes to simula
 
 #cProfile.run('LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)')
 
-LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
+#LMATestSimulation(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
+
+BayesianTest(T, f0, D, alpha, beta, rho, Vv, numSimulations)
+
+#OutliersTest(T, f0, D, alpha, beta, rho, Vv, numquotes, numSimulations)
+
+
 
 
 axes = plt.gca()
