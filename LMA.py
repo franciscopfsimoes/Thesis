@@ -189,7 +189,7 @@ def Improved(quote, vol, alpha, rho, Vv, beta, Lambda, W, JT, h):
 
 def Convergence(quote, vol, alpha, rho, Vv, beta, W, JT, h):
 
-    eps1, eps2, eps3 = 10**(-2), 10**(-2), 10 **(-1)
+    eps1, eps2, eps3 = 10**(-1), 10**(-1), 10 **(-3)
 
     hAlpha, hRho, hVv = float(h[0]), float(h[1]), float(h[2])
 
@@ -259,8 +259,8 @@ def LMA (quote, vol, beta, alpha, rho, Vv):
 
         counter += 1
 
-    print("LMA parameters:", alpha, rho, Vv)
+    #print("LMA parameters:", alpha, rho, Vv)
 
-    print("LMA iterations:", counter)
+    #print("LMA iterations:", counter)
 
     return alpha, rho, Vv
